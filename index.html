@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CyberLembur - Futuristic Payroll & Overtime</title>
+    <!-- Konfigurasi Manifest PWA Langsung di Dalam File -->
+    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22CyberLembur%22%2C%22short_name%22%3A%22CyberLembur%22%2C%22description%22%3A%22Aplikasi%20Kalkulator%20Gaji%20dan%20Lembur%20Karyawan%22%2C%22start_url%22%3A%22%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23121826%22%2C%22theme_color%22%3A%22%23121826%22%2C%22icons%22%3A%5B%5D%7D">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -473,24 +475,18 @@
             });
         };
 
-        // Fungsi Otomatis Hitung PPh 21 Berdasarkan Standar PTKP & Penghasilan Bruto Setahun
         function hitungPph21Otomatis(brutoBulanan, ptkpType) {
             let brutoSetahun = brutoBulanan * 12;
-            
-            // PTKP Tahunan Standar UU HPP
-            let ptkpVal = 54000000; // TK0
+            let ptkpVal = 54000000;
             if (ptkpType === 'TK1') ptkpVal = 58500000;
             if (ptkpType === 'K1') ptkpVal = 58500000;
             if (ptkpType === 'K2') ptkpVal = 63000000;
             if (ptkpType === 'K3') ptkpVal = 67500000;
 
-            // Biaya Jabatan (5% dari bruto setahun, maks 6 juta)
             let biayaJabatan = Math.min(brutoSetahun * 0.05, 6000000);
-            
             let netoSetahun = brutoSetahun - biayaJabatan;
             let pkp = Math.max(0, netoSetahun - ptkpVal);
 
-            // Perhitungan Lapisan Pajak Progresif (Pasal 17)
             let pphSetahun = 0;
             if (pkp <= 60000000) {
                 pphSetahun = pkp * 0.05;
@@ -502,8 +498,7 @@
                 pphSetahun = (60000000 * 0.05) + (190000000 * 0.15) + (250000000 * 0.25) + ((pkp - 500000000) * 0.30);
             }
 
-            let pphBulanan = Math.round(pphSetahun / 12);
-            return pphBulanan;
+            return Math.round(pphSetahun / 12);
         }
 
         function saveTarif() {
@@ -603,7 +598,6 @@
 
             const subtotal = gapok + tMkt + tTt + uL1 + uL2 + uL3 + uL4 + uUml + uShift2 + koreksi;
 
-            // Hitung Otomatis PPh 21 berdasarkan Total Pendapatan Bruto Bulan ini & Status PTKP
             let ptkpStatus = document.getElementById('ptkpStatus').value;
             let autoPph = hitungPph21Otomatis(subtotal, ptkpStatus);
             document.getElementById('pph21').value = autoPph;
