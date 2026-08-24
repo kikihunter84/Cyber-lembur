@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberLembur - Futuristic Payroll & Overtime</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #121826;
+            --surface: #1e293b;
+            --surface-glass: rgba(30, 41, 59, 0.85);
+            --border: #334155;
+            --border-glow: rgba(56, 189, 248, 0.25);
+            --text: #f1f5f9;
+            --text-muted: #94a3b8;
+            --accent-cyan: #38bdf8;
+            --accent-blue: #60a5fa;
+            --neon-green: #34d399;
+            --neon-red: #fb7185;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            --radius: 16px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+        body { background-color: var(--bg); color: var(--text); padding-bottom: 90px; font-size: 14px; min-height: 100vh; }
+        
+        .app-header {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            color: white;
+            padding: 24px 16px 36px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom-left-radius: 28px;
+            border-bottom-right-radius: 28px;
+            border-bottom: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+        .app-brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.2rem; letter-spacing: 0.5px; color: #fff; }
+        .app-brand i { background: rgba(56, 189, 248, 0.15); color: var(--accent-cyan); padding: 8px; border-radius: 10px; font-size: 0.9rem; border: 1px solid rgba(56, 189, 248, 0.3); }
+        .header-action { background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: var(--accent-cyan); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; }
+        .header-action:hover { background: rgba(56, 189, 248, 0.15); }
+
+        .container { max-width: 480px; margin: 0 auto; padding: 0 16px; }
+
+        .summary-card {
+            background: var(--surface-glass);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 22px;
+            margin-top: -24px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .summary-label { font-size: 0.70rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+        .summary-value-hours { font-size: 1.2rem; font-weight: 800; color: var(--text); margin-top: 4px; }
+        .summary-divider { height: 1px; background: var(--border); margin: 16px 0; }
+        .summary-value-income { font-size: 1.8rem; font-weight: 900; color: var(--neon-green); margin-top: 4px; }
+
+        .nav-tabs {
+            position: fixed; bottom: 0; left: 0; width: 100%; background: #182232;
+            backdrop-filter: blur(16px); border-top: 1px solid var(--border); display: flex; justify-content: space-around;
+            padding: 12px 0; z-index: 100; box-shadow: 0 -10px 25px rgba(0,0,0,0.3);
+        }
+        .nav-btn {
+            background: none; border: none; font-size: 0.75rem; font-weight: 600; color: var(--text-muted);
+            cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1;
+            transition: 0.3s ease;
+        }
+        .nav-btn i { font-size: 1.2rem; }
+        .nav-btn.active { color: var(--accent-cyan); }
+
+        .section-page { display: none; animation: fadeIn 0.3s ease-in-out; }
+        .section-page.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 { font-size: 1.15rem; font-weight: 800; color: var(--text); margin-bottom: 14px; letter-spacing: 0.5px; }
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 14px; box-shadow: var(--shadow); }
+
+        .form-group { margin-bottom: 12px; }
+        label { display: block; font-size: 0.70rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.8px; }
+        input, select { width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; font-size: 0.9rem; background: #131b2c; color: var(--text); outline: none; transition: 0.3s; }
+        input:focus, select:focus { border-color: var(--accent-cyan); box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15); }
+        
+        .btn-primary { width: 100%; padding: 12px; background: var(--accent-cyan); color: #0f172a; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; text-align: center; box-shadow: 0 4px 15px rgba(56, 189, 248, 0.2); transition: 0.3s; }
+        .btn-success-main { background: var(--neon-green); color: #0f172a; border: none; padding: 14px; border-radius: 12px; font-weight: 800; cursor: pointer; width: 100%; text-align: center; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(52, 211, 153, 0.2); margin-top: 10px; font-size: 0.95rem; }
+        .btn-danger { background: rgba(251, 113, 133, 0.12); color: var(--neon-red); border: 1px solid rgba(251, 113, 133, 0.3); padding: 6px 12px; font-size: 0.75rem; font-weight: 700; border-radius: 8px; cursor: pointer; transition: 0.2s; }
+        .btn-danger:hover { background: rgba(251, 113, 133, 0.25); }
+        .btn-delete-archive { background: var(--neon-red); color: #fff; border: none; padding: 12px; font-size: 0.9rem; font-weight: 800; border-radius: 10px; cursor: pointer; width: 100%; margin-top: 14px; box-shadow: 0 4px 15px rgba(251, 113, 133, 0.2); }
+
+        .card-item { background: var(--surface); border: 1px solid var(--border); padding: 14px 16px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow); transition: 0.2s; }
+        .item-left { display: flex; align-items: flex-start; gap: 12px; }
+        .item-icon { background: rgba(52, 211, 153, 0.12); color: var(--neon-green); width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; border: 1px solid rgba(52, 211, 153, 0.25); }
+
+        .slip-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 14px; box-shadow: var(--shadow); }
+        .slip-header { border-bottom: 2px solid var(--border); padding-bottom: 10px; margin-bottom: 12px; font-size: 0.85rem; font-weight: 700; color: var(--accent-cyan); display: flex; align-items: center; gap: 8px; }
+        .slip-info { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.8rem; margin-bottom: 14px; background: #131b2c; padding: 12px; border-radius: 10px; border: 1px solid var(--border); }
+        
+        .slip-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-bottom: 12px; }
+        .slip-table th, .slip-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); text-align: left; }
+        .slip-table th { background: #131b2c; font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .slip-table td:nth-child(2), .slip-table th:nth-child(2) { text-align: center; }
+        .slip-table td:nth-child(3), .slip-table th:nth-child(3),
+        .slip-table td:nth-child(4), .slip-table th:nth-child(4) { text-align: right; }
+
+        .subtotal-row { background: rgba(52, 211, 153, 0.12); color: var(--neon-green); font-weight: 800; }
+        .deduct-row { background: rgba(251, 113, 133, 0.12); color: var(--neon-red); font-weight: 800; }
+        
+        .net-pay-box { background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: #fff; padding: 16px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 0.95rem; margin-top: 14px; box-shadow: 0 4px 15px rgba(16,185,129,0.25); }
+        .net-pay-box span:last-child { font-size: 1.2rem; }
+
+        .custom-modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(6px);
+            display: flex; align-items: center; justify-content: center; z-index: 1000;
+            opacity: 0; pointer-events: none; transition: 0.3s ease;
+        }
+        .custom-modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .custom-modal {
+            background: var(--surface); border: 1px solid var(--border);
+            width: 90%; max-width: 340px; border-radius: var(--radius); padding: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4); transform: scale(0.9);
+            transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); text-align: center;
+        }
+        .custom-modal-overlay.active .custom-modal { transform: scale(1); }
+        .modal-icon { font-size: 2.5rem; color: var(--accent-cyan); margin-bottom: 12px; }
+        .modal-title { font-size: 1.1rem; font-weight: 800; color: var(--text); margin-bottom: 8px; }
+        .modal-desc { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px; line-height: 1.4; }
+        .modal-buttons { display: flex; gap: 10px; }
+        .modal-btn { flex: 1; padding: 10px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: 0.2s; border: none; }
+        .modal-btn-cancel { background: rgba(255,255,255,0.06); color: var(--text-muted); border: 1px solid var(--border); }
+        .modal-btn-confirm { background: var(--neon-green); color: #0f172a; box-shadow: 0 4px 12px rgba(52,211,153,0.25); }
+        .modal-btn-danger { background: var(--neon-red); color: white; box-shadow: 0 4px 12px rgba(251,113,133,0.25); }
+    </style>
+</head>
+<body>
+
+    <header class="app-header">
+        <div class="app-brand">
+            <i class="fa-solid fa-bolt-lightning"></i> CyberLembur
+        </div>
+        <button class="header-action" onclick="switchPage('tarif', this)" title="Pengaturan & Tarif">
+            <i class="fa-solid fa-sliders"></i>
+        </button>
+    </header>
+
+    <div class="container">
+        <!-- TAB 1: BERANDA / LEMBUR -->
+        <div id="pageLembur" class="section-page active">
+            
+            <div class="summary-card">
+                <div class="summary-label"><i class="fa-solid fa-chart-pie" style="color: var(--accent-cyan);"></i> Total Jam Lembur Periode Ini</div>
+                <div class="summary-value-hours"><span id="totalJamText">0</span> Jam</div>
+                <div class="summary-divider"></div>
+                <div class="summary-label"><i class="fa-solid fa-wallet" style="color: var(--neon-green);"></i> Estimasi Gaji Bersih (Net Pay)</div>
+                <div class="summary-value-income" id="summaryNetPay">Rp 0</div>
+            </div>
+
+            <h2><i class="fa-regular fa-calendar-days" style="color: var(--accent-cyan);"></i> Daftar Lembur Harian</h2>
+
+            <div class="card">
+                <form id="lemburForm">
+                    <div class="form-group"><label><i class="fa-regular fa-calendar"></i> Tanggal Lembur</label><input type="date" id="tanggal" required onchange="autoSetPeriod(this.value)"></div>
+                    <div class="form-group"><label><i class="fa-solid fa-clock"></i> Total Jam Lembur</label><input type="number" step="1" id="jmlJam" placeholder="Contoh: 3 atau 5" required></div>
+                    <button type="submit" class="btn-success-main"><i class="fa-solid fa-plus-circle"></i> Tambah Lembur Baru</button>
+                </form>
+            </div>
+
+            <div id="listKartu"></div>
+        </div>
+
+        <!-- TAB 2: PENGATURAN & TARIF -->
+        <div id="pageTarif" class="section-page" style="margin-top: 20px;">
+            <h2><i class="fa-solid fa-gears" style="color: var(--accent-cyan);"></i> Pengaturan Sistem & Gaji</h2>
+            
+            <div class="card">
+                <h3 style="font-size: 0.85rem; color: var(--accent-cyan); margin-bottom: 10px; font-weight: 800;"><i class="fa-regular fa-calendar-alt"></i> Periode & Shift Kerja (6 Hari Kerja)</h3>
+                <div class="form-group"><label>Mulai Periode</label><input type="date" id="periodStart" value="2026-07-21" oninput="saveTarif()"></div>
+                <div class="form-group"><label>Akhir Periode</label><input type="date" id="periodEnd" value="2026-08-20" oninput="saveTarif()"></div>
+                <div class="form-group">
+                    <label>Siklus Shift Minggu Kerja</label>
+                    <select id="activeShift" onchange="saveTarif()">
+                        <option value="1">Shift 1 di awal minggu</option>
+                        <option value="2">Shift 2 di awal minggu</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 style="font-size: 0.85rem; color: var(--accent-cyan); margin-bottom: 10px; font-weight: 800;"><i class="fa-regular fa-user"></i> Identitas Karyawan & Pajak</h3>
+                <div class="form-group"><label>Nama Karyawan</label><input type="text" id="nama" value="Kiki Kurniawan" oninput="saveTarif()"></div>
+                <div class="form-group"><label>NIK Barcode</label><input type="text" id="nik" value="1917" oninput="saveTarif()"></div>
+                <div class="form-group"><label>Tanggal Masuk</label><input type="date" id="tglMasuk" value="2024-02-01" oninput="saveTarif()"></div>
+                <div class="form-group">
+                    <label>Status PTKP (Untuk Hitung PPh 21 Otomatis)</label>
+                    <select id="ptkpStatus" onchange="saveTarif()">
+                        <option value="TK0">TK/0 (Tanpa Tanggungan)</option>
+                        <option value="TK1">TK/1 atau K/0</option>
+                        <option value="K1" selected>K/1 (Menikah, 1 Anak)</option>
+                        <option value="K2">K/2 (Menikah, 2 Anak)</option>
+                        <option value="K3">K/3 (Menikah, 3 Anak)</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Gaji Pokok (Rp)</label><input type="number" id="gajiPokok" value="4110892" oninput="saveTarif()"></div>
+                <div class="form-group"><label>Tunjangan (T.M. K + T.Lain)</label><input type="number" id="tMkt" value="50000" oninput="saveTarif()"></div>
+                <div class="form-group"><label>Tunjangan TT</label><input type="number" id="tTt" value="0" oninput="saveTarif()"></div>
+            </div>
+
+            <div class="card">
+                <h3 style="font-size: 0.85rem; color: var(--accent-cyan); margin-bottom: 10px; font-weight: 800;"><i class="fa-solid fa-coins"></i> Tarif Satuan</h3>
+                <div class="form-group"><label>Tarif Lembur 1 (L1)</label><input type="number" id="rL1" value="35644" oninput="saveTarif()"></div>
+                <div class="form-group"><label>Tarif Lembur 2 (L2)</label><input type="number" id="rL2" value="47525" oninput="saveTarif()"></div>
+                <div class="form-group"><label>Tarif Lembur 3 (L3)</label><input type="number" id="rL3" value="71827" oninput="saveTarif()"></div>
+                <div class="form-group"><label>Tarif Lembur 4 (L4)</label><input type="number" id="rL4" value="95050" oninput="saveTarif()"></div>
+                <div class="form-group"><label>UML (Uang Makan Lembur)</label><input type="number" id="rUml" value="5000" oninput="saveTarif()"></div>
+                <div class="form-group"><label>Tarif Shift 2 (per Hari)</label><input type="number" id="rShift2" value="7900" oninput="saveTarif()"></div>
+                <div class="form-group"><label>Koreksi (+/-)</label><input type="number" id="koreksi" value="0" oninput="saveTarif()"></div>
+            </div>
+
+            <div class="card">
+                <h3 style="font-size: 0.85rem; color: var(--neon-red); margin-bottom: 10px; font-weight: 800;"><i class="fa-solid fa-file-invoice-dollar"></i> Potongan Lainnya</h3>
+                <div class="form-group"><label>Potongan Pinjaman</label><input type="number" id="potPinjaman" value="7000" oninput="saveTarif()"></div>
+                <div class="form-group"><label>Potongan Mkr / Izin</label><input type="number" id="potMkr" value="0" oninput="saveTarif()"></div>
+                <div class="form-group"><label>Potongan Astek</label><input type="number" id="potAstek" value="164436" oninput="saveTarif()"></div>
+                <div class="form-group">
+                    <label>PPh 21 (Otomatis / Bisa Diedit)</label>
+                    <input type="number" id="pph21" value="78082" oninput="saveTarif()">
+                    <small style="color: var(--text-muted); font-size: 0.65rem; margin-top: 4px; display: block;">*Akan terhitung otomatis berdasarkan pajak progresif tahunan bersih, atau isi manual jika diperlukan.</small>
+                </div>
+            </div>
+            
+            <button class="btn-primary" onclick="switchPage('lembur', document.querySelectorAll('.nav-btn')[0])"><i class="fa-solid fa-check"></i> Selesai & Kembali ke Beranda</button>
+        </div>
+
+        <!-- TAB 3: SLIP GAJI -->
+        <div id="pageSlip" class="section-page" style="margin-top: 20px;">
+            <h2><i class="fa-solid fa-file-invoice" style="color: var(--accent-cyan);"></i> Slip Gaji Profesional</h2>
+            <div class="slip-card">
+                <div class="slip-header">
+                    <i class="fa-regular fa-calendar"></i> Periode: <span id="sPeriode">2026-07-21 s/d 2026-08-20</span>
+                </div>
+                
+                <div class="slip-info">
+                    <div><b><i class="fa-regular fa-user"></i> Nama:</b> <br><span id="sNama">Kiki Kurniawan</span></div>
+                    <div><b><i class="fa-solid fa-id-card"></i> NIK:</b> <br><span id="sNik">1917</span></div>
+                </div>
+
+                <table class="slip-table">
+                    <thead>
+                        <tr>
+                            <th>Komponen</th>
+                            <th>Qty</th>
+                            <th>Tarif</th>
+                            <th>Jumlah</th>
+                        </tr>
+                    </thead>
+                    <tbody id="slipBody">
+                        <!-- Terisi otomatis -->
+                    </tbody>
+                </table>
+
+                <div class="net-pay-box">
+                    <span><i class="fa-solid fa-wallet"></i> JUMLAH DITERIMA</span>
+                    <span id="netPayText">Rp 0</span>
+                </div>
+
+                <button class="btn-success-main" onclick="arsipPeriodeIni()"><i class="fa-solid fa-box-archive"></i> Arsipkan & Reset Periode</button>
+            </div>
+        </div>
+
+        <!-- TAB 4: ARSIP -->
+        <div id="pageArsip" class="section-page" style="margin-top: 20px;">
+            <h2><i class="fa-solid fa-box-archive" style="color: var(--accent-cyan);"></i> Arsip Periode Lalu</h2>
+            <div class="card">
+                <div class="form-group">
+                    <label><i class="fa-solid fa-folder-open"></i> Pilih Periode Arsip:</label>
+                    <select id="archiveSelect" onchange="loadArchive(this.value)"></select>
+                </div>
+            </div>
+            <div id="archiveContentBox"></div>
+        </div>
+    </div>
+
+    <!-- Custom Modal Konfirmasi Universal -->
+    <div id="customModal" class="custom-modal-overlay">
+        <div class="custom-modal">
+            <div class="modal-icon" id="modalIcon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <div class="modal-title" id="modalTitle">Konfirmasi</div>
+            <div class="modal-desc" id="modalText">Pesan konfirmasi...</div>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-cancel" onclick="resolveModal(false)">Batal</button>
+                <button class="modal-btn modal-btn-confirm" id="modalConfirmBtn" onclick="resolveModal(true)">Ya, Lanjutkan</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-tabs">
+        <button class="nav-btn active" onclick="switchPage('lembur', this)">
+            <i class="fa-solid fa-house-chimney"></i> Beranda
+        </button>
+        <button class="nav-btn" onclick="switchPage('slip', this)">
+            <i class="fa-solid fa-file-invoice-dollar"></i> Slip Gaji
+        </button>
+        <button class="nav-btn" onclick="switchPage('arsip', this)">
+            <i class="fa-solid fa-box-archive"></i> Arsip
+        </button>
+    </div>
+
+    <script>
+        let modalCallback = null;
+
+        function showModal(title, text, iconClass, btnClass, callback) {
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalText').innerText = text;
+            document.getElementById('modalIcon').innerHTML = `<i class="${iconClass}"></i>`;
+            
+            let btn = document.getElementById('modalConfirmBtn');
+            btn.className = `modal-btn ${btnClass}`;
+            
+            modalCallback = callback;
+            document.getElementById('customModal').classList.add('active');
+        }
+
+        function resolveModal(result) {
+            document.getElementById('customModal').classList.remove('active');
+            if (modalCallback) {
+                modalCallback(result);
+                modalCallback = null;
+            }
+        }
+
+        function switchPage(pageId, btn) {
+            document.querySelectorAll('.section-page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            
+            if (pageId === 'lembur') {
+                document.getElementById('pageLembur').classList.add('active');
+                generateSlip();
+            }
+            if (pageId === 'tarif') {
+                document.getElementById('pageTarif').classList.add('active');
+            } else {
+                document.querySelectorAll('.nav-btn').forEach(b => {
+                    if(b.getAttribute('onclick').includes(pageId)) b.classList.add('active');
+                });
+            }
+
+            if (pageId === 'slip') {
+                document.getElementById('pageSlip').classList.add('active');
+                generateSlip();
+            }
+            if (pageId === 'arsip') {
+                document.getElementById('pageArsip').classList.add('active');
+                updateArchiveSelector();
+            }
+            if(btn && btn.classList && btn.classList.contains('nav-btn')) {
+                btn.classList.add('active');
+            }
+        }
+
+        function formatRp(angka) {
+            return "Rp " + new Intl.NumberFormat('id-ID', { maximumFractionDigits: 2 }).format(angka);
+        }
+
+        const form = document.getElementById('lemburForm');
+        const inputTanggal = document.getElementById('tanggal');
+        const inputJmlJam = document.getElementById('jmlJam');
+        const listKartu = document.getElementById('listKartu');
+        const totalJamText = document.getElementById('totalJamText');
+
+        inputTanggal.valueAsDate = new Date();
+        let dataLembur = JSON.parse(localStorage.getItem('appLemburV17')) || [];
+
+        function autoSetPeriod(dateStr) {
+            if (!dateStr) return;
+            let d = new Date(dateStr + 'T00:00:00');
+            let year = d.getFullYear();
+            let month = d.getMonth();
+            let day = d.getDate();
+
+            let startYear = year, startMonth = month, endYear = year, endMonth = month + 1;
+
+            if (day < 21) {
+                startMonth = month - 1;
+                if (startMonth < 0) { startMonth = 11; startYear = year - 1; }
+                endMonth = month;
+            } else {
+                startMonth = month;
+                endMonth = month + 1;
+                if (endMonth > 11) { endMonth = 0; endYear = year + 1; }
+            }
+
+            let startStr = `${startYear}-${String(startMonth + 1).padStart(2, '0')}-21`;
+            let endStr = `${endYear}-${String(endMonth + 1).padStart(2, '0')}-20`;
+
+            document.getElementById('periodStart').value = startStr;
+            document.getElementById('periodEnd').value = endStr;
+            saveTarif();
+        }
+
+        function calcOT(h, sunday) {
+            h = Math.max(0, Math.floor(Number(h) || 0));
+            if (!h) return { l1: 0, l2: 0, l3: 0, l4: 0 };
+            let l3 = Math.floor(h / 8);
+            let l4 = sunday ? Math.max(0, h - 13) : 0;
+            let l1 = 1;
+            let l2 = h - l1 - l3;
+            if (l2 < 0) l2 = 0;
+            if (l4 > 0) l2 = Math.max(0, l2 - l4);
+            return { l1, l2, l3, l4 };
+        }
+
+        function renderLembur() {
+            listKartu.innerHTML = '';
+            let totalJam = 0;
+
+            if (dataLembur.length === 0) {
+                listKartu.innerHTML = '<p style="text-align: center; color: var(--text-muted); font-size: 0.8rem; padding: 20px;">Belum ada data lembur di periode ini.</p>';
+                totalJamText.innerText = '0';
+                generateSlip();
+                return;
+            }
+
+            dataLembur.forEach((item, index) => {
+                totalJam += parseInt(item.jam);
+                const isSunday = new Date(item.tanggal + 'T00:00:00').getDay() === 0;
+                const b = calcOT(item.jam, isSunday);
+
+                const card = document.createElement('div');
+                card.className = 'card-item';
+                card.innerHTML = `
+                    <div class="item-left">
+                        <div class="item-icon"><i class="fa-regular fa-clock"></i></div>
+                        <div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);"><i class="fa-regular fa-calendar"></i> ${item.tanggal}</div>
+                            <div style="font-weight: 700; font-size: 0.95rem; margin-top: 2px;"><i class="fa-solid fa-bolt" style="color: var(--accent-cyan);"></i> ${item.jam} Jam Lembur</div>
+                            <div style="font-size: 0.75rem; color: var(--accent-cyan); margin-top: 2px;">L1: ${b.l1} | L2: ${b.l2} | L3: ${b.l3} | L4: ${b.l4}</div>
+                        </div>
+                    </div>
+                    <button class="btn-danger" onclick="hapusData(${index})"><i class="fa-solid fa-trash-can"></i> Hapus</button>
+                `;
+                listKartu.appendChild(card);
+            });
+
+            totalJamText.innerText = totalJam;
+            generateSlip();
+            localStorage.setItem('appLemburV17', JSON.stringify(dataLembur));
+        }
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            dataLembur.push({ tanggal: inputTanggal.value, jam: inputJmlJam.value });
+            form.reset();
+            inputTanggal.valueAsDate = new Date();
+            renderLembur();
+        });
+
+        window.hapusData = function(index) {
+            showModal('Hapus Data', 'Yakin ingin menghapus catatan lembur tanggal ini?', 'fa-solid fa-triangle-exclamation', 'modal-btn-danger', (confirmed) => {
+                if (confirmed) {
+                    dataLembur.splice(index, 1);
+                    renderLembur();
+                }
+            });
+        };
+
+        // Fungsi Otomatis Hitung PPh 21 Berdasarkan Standar PTKP & Penghasilan Bruto Setahun
+        function hitungPph21Otomatis(brutoBulanan, ptkpType) {
+            let brutoSetahun = brutoBulanan * 12;
+            
+            // PTKP Tahunan Standar UU HPP
+            let ptkpVal = 54000000; // TK0
+            if (ptkpType === 'TK1') ptkpVal = 58500000;
+            if (ptkpType === 'K1') ptkpVal = 58500000;
+            if (ptkpType === 'K2') ptkpVal = 63000000;
+            if (ptkpType === 'K3') ptkpVal = 67500000;
+
+            // Biaya Jabatan (5% dari bruto setahun, maks 6 juta)
+            let biayaJabatan = Math.min(brutoSetahun * 0.05, 6000000);
+            
+            let netoSetahun = brutoSetahun - biayaJabatan;
+            let pkp = Math.max(0, netoSetahun - ptkpVal);
+
+            // Perhitungan Lapisan Pajak Progresif (Pasal 17)
+            let pphSetahun = 0;
+            if (pkp <= 60000000) {
+                pphSetahun = pkp * 0.05;
+            } else if (pkp <= 250000000) {
+                pphSetahun = (60000000 * 0.05) + ((pkp - 60000000) * 0.15);
+            } else if (pkp <= 500000000) {
+                pphSetahun = (60000000 * 0.05) + (190000000 * 0.15) + ((pkp - 250000000) * 0.25);
+            } else {
+                pphSetahun = (60000000 * 0.05) + (190000000 * 0.15) + (250000000 * 0.25) + ((pkp - 500000000) * 0.30);
+            }
+
+            let pphBulanan = Math.round(pphSetahun / 12);
+            return pphBulanan;
+        }
+
+        function saveTarif() {
+            const config = {
+                periodStart: document.getElementById('periodStart').value,
+                periodEnd: document.getElementById('periodEnd').value,
+                activeShift: document.getElementById('activeShift').value,
+                nama: document.getElementById('nama').value,
+                nik: document.getElementById('nik').value,
+                tglMasuk: document.getElementById('tglMasuk').value,
+                ptkpStatus: document.getElementById('ptkpStatus').value,
+                gajiPokok: document.getElementById('gajiPokok').value,
+                tMkt: document.getElementById('tMkt').value,
+                tTt: document.getElementById('tTt').value,
+                rL1: document.getElementById('rL1').value,
+                rL2: document.getElementById('rL2').value,
+                rL3: document.getElementById('rL3').value,
+                rL4: document.getElementById('rL4').value,
+                rUml: document.getElementById('rUml').value,
+                rShift2: document.getElementById('rShift2').value,
+                koreksi: document.getElementById('koreksi').value,
+                potPinjaman: document.getElementById('potPinjaman').value,
+                potMkr: document.getElementById('potMkr').value,
+                potAstek: document.getElementById('potAstek').value,
+                pph21: document.getElementById('pph21').value,
+            };
+            localStorage.setItem('appConfigV17', JSON.stringify(config));
+            generateSlip();
+        }
+
+        function loadTarif() {
+            const saved = JSON.parse(localStorage.getItem('appConfigV17'));
+            if (!saved) return;
+            for (let key in saved) {
+                if (document.getElementById(key)) document.getElementById(key).value = saved[key];
+            }
+        }
+
+        function hitungShift2EnamHari(startDateStr, endDateStr, baseShift) {
+            let start = new Date(startDateStr + 'T00:00:00');
+            let end = new Date(endDateStr + 'T00:00:00');
+            if (isNaN(start) || isNaN(end) || end < start) return 0;
+
+            let countShift2 = 0;
+            let initialShift = Number(baseShift);
+
+            for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+                if (d.getDay() !== 0) {
+                    let diffDays = Math.floor((d - start) / 86400000);
+                    let weekIdx = Math.floor(diffDays / 7);
+                    let currentWeekShift = (weekIdx % 2 === 0) ? initialShift : (initialShift === 1 ? 2 : 1);
+
+                    if (currentWeekShift === 2) countShift2++;
+                }
+            }
+            return countShift2;
+        }
+
+        let slipHtmlCache = "";
+
+        function generateSlip() {
+            loadTarif();
+            
+            const pStart = document.getElementById('periodStart').value;
+            const pEnd = document.getElementById('periodEnd').value;
+            const baseShift = document.getElementById('activeShift').value;
+
+            document.getElementById('sPeriode').innerText = `${pStart} s/d ${pEnd}`;
+            document.getElementById('sNama').innerText = document.getElementById('nama').value;
+            document.getElementById('sNik').innerText = document.getElementById('nik').value;
+
+            let jmlShift2 = hitungShift2EnamHari(pStart, pEnd, baseShift);
+
+            let tL1 = 0, tL2 = 0, tL3 = 0, tL4 = 0, jmlUml = 0;
+            dataLembur.forEach(item => {
+                const isSunday = new Date(item.tanggal + 'T00:00:00').getDay() === 0;
+                const b = calcOT(item.jam, isSunday);
+                tL1 += b.l1; tL2 += b.l2; tL3 += b.l3; tL4 += b.l4;
+                if(Number(item.jam) > 0) jmlUml++;
+            });
+
+            const gapok = Number(document.getElementById('gajiPokok').value) || 0;
+            const tMkt = Number(document.getElementById('tMkt').value) || 0;
+            const tTt = Number(document.getElementById('tTt').value) || 0;
+            
+            const rL1 = Number(document.getElementById('rL1').value) || 0;
+            const rL2 = Number(document.getElementById('rL2').value) || 0;
+            const rL3 = Number(document.getElementById('rL3').value) || 0;
+            const rL4 = Number(document.getElementById('rL4').value) || 0;
+            const rUml = Number(document.getElementById('rUml').value) || 0;
+            const rShift2 = Number(document.getElementById('rShift2').value) || 0;
+            const koreksi = Number(document.getElementById('koreksi').value) || 0;
+
+            const uL1 = tL1 * rL1, uL2 = tL2 * rL2, uL3 = tL3 * rL3, uL4 = tL4 * rL4;
+            const uUml = jmlUml * rUml;
+            const uShift2 = jmlShift2 * rShift2;
+
+            const subtotal = gapok + tMkt + tTt + uL1 + uL2 + uL3 + uL4 + uUml + uShift2 + koreksi;
+
+            // Hitung Otomatis PPh 21 berdasarkan Total Pendapatan Bruto Bulan ini & Status PTKP
+            let ptkpStatus = document.getElementById('ptkpStatus').value;
+            let autoPph = hitungPph21Otomatis(subtotal, ptkpStatus);
+            document.getElementById('pph21').value = autoPph;
+
+            const pPinj = Number(document.getElementById('potPinjaman').value) || 0;
+            const pMkr = Number(document.getElementById('potMkr').value) || 0;
+            const pAstek = Number(document.getElementById('potAstek').value) || 0;
+            const pPph = autoPph;
+
+            const totalPotongan = pPinj + pMkr + pAstek + pPph;
+            const jumlahDiterima = subtotal - totalPotongan;
+
+            document.getElementById('summaryNetPay').innerText = formatRp(jumlahDiterima);
+
+            let html = `
+                <tr><td>Gaji Pokok</td><td>1</td><td>${formatRp(gapok)}</td><td>${formatRp(gapok)}</td></tr>
+                ${tMkt > 0 ? `<tr><td>T. M. K+T.Lain</td><td>1</td><td>${formatRp(tMkt)}</td><td>${formatRp(tMkt)}</td></tr>` : ''}
+                ${tTt > 0 ? `<tr><td>T. TT</td><td>1</td><td>${formatRp(tTt)}</td><td>${formatRp(tTt)}</td></tr>` : ''}
+                ${tL1 > 0 ? `<tr><td>Lembur 1</td><td>${tL1}</td><td>${formatRp(rL1)}</td><td>${formatRp(uL1)}</td></tr>` : ''}
+                ${tL2 > 0 ? `<tr><td>Lembur 2</td><td>${tL2}</td><td>${formatRp(rL2)}</td><td>${formatRp(uL2)}</td></tr>` : ''}
+                ${tL3 > 0 ? `<tr><td>Lembur 3</td><td>${tL3}</td><td>${formatRp(rL3)}</td><td>${formatRp(uL3)}</td></tr>` : ''}
+                ${tL4 > 0 ? `<tr><td>Lembur 4</td><td>${tL4}</td><td>${formatRp(rL4)}</td><td>${formatRp(uL4)}</td></tr>` : ''}
+                ${jmlUml > 0 ? `<tr><td>UML</td><td>${jmlUml}</td><td>${formatRp(rUml)}</td><td>${formatRp(uUml)}</td></tr>` : ''}
+                ${jmlShift2 > 0 ? `<tr><td>Shift 2</td><td>${jmlShift2}</td><td>${formatRp(rShift2)}</td><td>${formatRp(uShift2)}</td></tr>` : ''}
+                ${koreksi !== 0 ? `<tr><td>Koreksi</td><td>1</td><td>${formatRp(koreksi)}</td><td>${formatRp(koreksi)}</td></tr>` : ''}
+                <tr class="subtotal-row"><td colspan="3">Subtotal</td><td>${formatRp(subtotal)}</td></tr>
+                
+                <tr><td>Pot Pinjaman</td><td>1</td><td>${formatRp(pPinj)}</td><td>${formatRp(pPinj)}</td></tr>
+                <tr><td>Pot Mkr/Izin</td><td>-</td><td>-</td><td>${formatRp(pMkr)}</td></tr>
+                <tr><td>Pot Astek</td><td>1</td><td>${formatRp(pAstek)}</td><td>${formatRp(pAstek)}</td></tr>
+                <tr><td>Pph 21 (${ptkpStatus})</td><td>1</td><td>${formatRp(pPph)}</td><td>${formatRp(pPph)}</td></tr>
+                <tr class="deduct-row"><td colspan="3">Total Potongan</td><td>${formatRp(totalPotongan)}</td></tr>
+            `;
+
+            document.getElementById('slipBody').innerHTML = html;
+            document.getElementById('netPayText').innerText = formatRp(jumlahDiterima);
+
+            slipHtmlCache = document.querySelector('.slip-card').innerHTML;
+        }
+
+        function arsipPeriodeIni() {
+            showModal(
+                'Arsip & Reset Periode', 
+                'Periode dan data lembur berhasil diarsipkan! Kosongkan data untuk periode baru?', 
+                'fa-solid fa-box-archive', 
+                'modal-btn-confirm', 
+                (confirmed) => {
+                    if (!confirmed) return;
+
+                    const pStart = document.getElementById('periodStart').value;
+                    const pEnd = document.getElementById('periodEnd').value;
+                    const archiveKey = `arsip_${pStart}_to_${pEnd}`;
+
+                    let archives = JSON.parse(localStorage.getItem('appArchivesV17')) || {};
+                    
+                    let lemburListHtml = '<div style="margin-top: 15px; background: #131b2c; padding: 12px; border-radius: 8px; border: 1px solid var(--border);"><h4 style="font-size: 0.8rem; margin-bottom: 8px; color: var(--accent-cyan);"><i class="fa-solid fa-clock-rotate-left"></i> Riwayat Lembur Periode Ini:</h4>';
+                    if (dataLembur.length === 0) {
+                        lemburListHtml += '<p style="font-size: 0.75rem; color: var(--text-muted);">Tidak ada catatan lembur.</p>';
+                    } else {
+                        dataLembur.forEach(item => {
+                            const isSunday = new Date(item.tanggal + 'T00:00:00').getDay() === 0;
+                            const b = calcOT(item.jam, isSunday);
+                            lemburListHtml += `<div style="font-size: 0.75rem; border-bottom: 1px dashed var(--border); padding: 6px 0; display: flex; justify-content: space-between;"><span><i class="fa-regular fa-calendar"></i> ${item.tanggal}</span> <b>${item.jam} Jam (L1:${b.l1}, L2:${b.l2})</b></div>`;
+                        });
+                    }
+                    lemburListHtml += '</div>';
+
+                    archives[archiveKey] = {
+                        periode: `${pStart} s/d ${pEnd}`,
+                        slipHtml: slipHtmlCache,
+                        lemburHtml: lemburListHtml
+                    };
+
+                    localStorage.setItem('appArchivesV17', JSON.stringify(archives));
+                    
+                    dataLembur = [];
+                    localStorage.removeItem('appLemburV17');
+                    renderLembur();
+                    switchPage('lembur', document.querySelectorAll('.nav-btn')[0]);
+                }
+            );
+        }
+
+        function updateArchiveSelector() {
+            let archives = JSON.parse(localStorage.getItem('appArchivesV17')) || {};
+            let keys = Object.keys(archives);
+            let select = document.getElementById('archiveSelect');
+            
+            if (keys.length === 0) {
+                select.innerHTML = '<option value="">Belum ada arsip tersimpan</option>';
+                document.getElementById('archiveContentBox').innerHTML = '';
+                return;
+            }
+
+            let opts = '<option value="">-- Pilih Periode Arsip --</option>';
+            keys.forEach(k => {
+                opts += `<option value="${k}">Periode: ${archives[k].periode}</option>`;
+            });
+            select.innerHTML = opts;
+            document.getElementById('archiveContentBox').innerHTML = '';
+        }
+
+        function loadArchive(key) {
+            if (!key) {
+                document.getElementById('archiveContentBox').innerHTML = '';
+                return;
+            }
+            let archives = JSON.parse(localStorage.getItem('appArchivesV17')) || {};
+            if (archives[key]) {
+                document.getElementById('archiveContentBox').innerHTML = `
+                    <div class="slip-card" style="margin-top: 10px;">
+                        ${archives[key].slipHtml}
+                        ${archives[key].lemburHtml}
+                        <button class="btn-delete-archive" onclick="hapusArsip('${key}')"><i class="fa-solid fa-trash-can"></i> Hapus Arsip Ini</button>
+                    </div>
+                `;
+            }
+        }
+
+        window.hapusArsip = function(key) {
+            showModal(
+                'Hapus Arsip', 
+                'Yakin ingin menghapus arsip periode ini secara permanen?', 
+                'fa-solid fa-triangle-exclamation', 
+                'modal-btn-danger', 
+                (confirmed) => {
+                    if (confirmed) {
+                        let archives = JSON.parse(localStorage.getItem('appArchivesV17')) || {};
+                        delete archives[key];
+                        localStorage.setItem('appArchivesV17', JSON.stringify(archives));
+                        updateArchiveSelector();
+                    }
+                }
+            );
+        };
+
+        loadTarif();
+        renderLembur();
+        autoSetPeriod(inputTanggal.value);
+    </script>
+</body>
+</html>
