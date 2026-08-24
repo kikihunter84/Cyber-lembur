@@ -1,0 +1,13 @@
+{
+  "background_color": "#121826",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "Cyber Lembur",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "Cyberlembur",
+  "start_url": "/",
+  "theme_color": "#121826",
+  "description": "Aplikasi catatan lembur",
+  "id": "/"
+}
